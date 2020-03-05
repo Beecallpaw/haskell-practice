@@ -8,6 +8,7 @@ dispatch :: String -> [String] -> IO ()
 dispatch "add" = add
 dispatch "view" = view
 dispatch "remove" = remove
+dispatch "bump" = bump
 
 main = do
     (command:argList) <- getArgs
@@ -27,9 +28,26 @@ remove :: [String] -> IO ()
 remove [fileName, numString] = do
     contents <- readFile fileName
     let todoTasks = lines contents
-    let number = read numString
+        number = read numString
         newTodoItems = unlines $ delete (todoTasks !! (number - 1)) todoTasks
     bracketOnError (openTempFile "." "temp") 
+        (\(tempFileName, tempHandle) -> do
+            hClose tempHandle
+            removeFile tempFileName)
+        (\(tempFileName, tempHandle) -> do
+            hPutStr tempHandle newTodoItems
+            hClose tempHandle
+            removeFile fileName
+            renameFile tempFileName fileName)
+
+bump :: [String] -> IO ()
+bump [fileName, numString] = do
+    contents <- readFile fileName
+    let todoTasks = lines contents
+        number = read numString
+        itemToBump = (todoTasks !! (number - 1))
+        newTodoItems = unlines $ [itemToBump] ++ delete (todoTasks !! (number -1)) todoTasks
+    bracketOnError (openTempFile "." "temp")
         (\(tempFileName, tempHandle) -> do
             hClose tempHandle
             removeFile tempFileName)
