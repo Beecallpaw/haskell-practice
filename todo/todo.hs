@@ -9,6 +9,10 @@ dispatch "add" = add
 dispatch "view" = view
 dispatch "remove" = remove
 dispatch "bump" = bump
+dispatch command = notAvailable command
+
+notAvailable :: String -> [String] -> IO ()
+notAvailable command _ = putStrLn $ "Sorry, The " ++ command ++ " is not available yet."
 
 main = do
     (command:argList) <- getArgs
@@ -16,6 +20,7 @@ main = do
 
 add :: [String] -> IO ()
 add [fileName, todoItem] = appendFile fileName (todoItem ++ "\n")
+add _ = putStrLn "Number of arguments doesnot match. Expected 2 (filename, todoItem)."
 
 view :: [String] -> IO ()
 view [fileName] = do
@@ -23,6 +28,7 @@ view [fileName] = do
     let todoTasks = lines contents
         numberedTasks = zipWith(\num line -> show num ++ ". " ++ line) [1..] todoTasks
     putStr $ unlines numberedTasks
+view _ = putStrLn "Number of arguments doesnot match. Expected 1 (filename)."
 
 remove :: [String] -> IO ()
 remove [fileName, numString] = do
@@ -39,6 +45,7 @@ remove [fileName, numString] = do
             hClose tempHandle
             removeFile fileName
             renameFile tempFileName fileName)
+remove _ = putStrLn "Number of arguments doesnot match. Expected 2 (filename, todoItemNumber)."
 
 bump :: [String] -> IO ()
 bump [fileName, numString] = do
@@ -56,3 +63,4 @@ bump [fileName, numString] = do
             hClose tempHandle
             removeFile fileName
             renameFile tempFileName fileName)
+bump _ = putStrLn "Number of arguments doesnot match. Expected 2 (filename, todoItemNumber)."
