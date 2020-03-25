@@ -8,7 +8,7 @@ primesTill :: Int -> [Int]
 primesTill n = [x| x <- [1..n], isPrime x]
 
 smallerPrimeThan :: Int -> Int
-smallerPrimeThan n = last $ primesTill n
+smallerPrimeThan = last . primesTill 
 
 greaterPrimeThan :: Int -> Int
 greaterPrimeThan n = head [x| x <- [n+1..], isPrime x] 
